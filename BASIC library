@@ -1,0 +1,84 @@
+###################### main
+from flask import Flask, render_template
+from flask import Flask, render_template
+from flask_wtf import FlaskForm
+from wtforms import StringField, PasswordField, SubmitField, validators
+from wtforms.validators import DataRequired, Length, Email
+from flask import current_app, request
+from werkzeug.urls import url_encode
+import flask_bootstrap
+from flask_bootstrap import Bootstrap5
+
+app = Flask(__name__)
+app.secret_key = "pythondev"
+bootstrap = Bootstrap5(app)
+
+
+class AddForm(FlaskForm):
+    book_name = StringField(label='Book Name', validators=[DataRequired()])
+    book_author = StringField(label='Book Author', validators=[DataRequired()])
+    rating = StringField(label='Rating', validators=[DataRequired()])
+    submit = SubmitField(label='Add Book')
+
+
+@app.route("/")
+def home():
+    return render_template('index.html')
+
+
+@app.route("/add", methods=["GET", "POST"])
+def add():
+    add_form = AddForm()
+    add_form.validate_on_submit()
+    print(add_form.book_name.data)
+    print(add_form.book_author.data)
+    print(add_form.rating.data)
+    return render_template('add.html', form=add_form)
+
+
+if __name__ == '__main__':
+    app.run(debug=True)
+
+
+################################ BASE
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    {% block styles %}
+        {{ bootstrap.load_css() }}
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='css/styles.css') }}"
+    />
+    {% endblock %}
+    <title>{% block title %}{% endblock%}</title>
+
+</head>
+<body>
+    {% block content %}{% endblock%}
+</body>
+</html>
+
+################################# INDEX
+{% extends "base.html" %}
+{% block title %}Coffee and Wifi{% endblock %}
+{% block content %}
+    <div class="jumbotron">
+      <div class="container">
+        <h1 class="display-4">My Library 📚</h1>
+        <a href="{{ url_for('add') }}">Add new book</a>
+      </div>
+    </div>
+{% endblock %}
+
+################################### ADD
+{% extends "base.html" %}
+{% from 'bootstrap4/form.html' import render_form %}
+{% block title %}Title{% endblock %}
+{% block content %}
+
+        <div class="container">
+		{{ render_form(form, novalidate=True) }}
+		</div>
+{% endblock %}
